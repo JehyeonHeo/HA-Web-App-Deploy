@@ -140,6 +140,6 @@ Outputs:
 
   LoadBalancer: 
     Description: Host name to the created load balancer.
-    Value: !GetAtt WebAppLB.DNSName
+    Value: !Join ["", ["http://", !GetAtt WebAppLB.DNSName] ]
     Export:
       Name: !Sub "${EnvironmentName}-LoadBalancerDNSName"
