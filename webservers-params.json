@@ -1,0 +1,10 @@
+[
+	{
+		"ParameterKey": "EnvironmentName",
+		"ParameterValue": "MyUdagramProject"
+	},
+    {
+        "ParameterKey": "AmazonAMI",
+        "ParameterValue": "ami-0ac73f33a1888c64a"
+    }
+]

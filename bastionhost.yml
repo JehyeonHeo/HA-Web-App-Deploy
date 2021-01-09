@@ -1,0 +1,54 @@
+Description:
+    This template deploys security group and instance for bastion host.
+
+Parameters:
+    EnvironmentName:
+        Description: An environment name that will be prefixed to resource names
+        Type: String
+    MyIPAdress:
+        Description: My IP adress that will be used to connect to bastion host.
+        Type: String
+    AmazonAMI:
+        Description: Amazon ami ID that will be used to configure instances.
+        Type: String
+
+Resources:
+    BastionHostSecGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Allow only ssh for inbound traffic from my IP address.
+        VpcId:
+          Fn::ImportValue:
+            !Sub "${EnvironmentName}-VPCID"
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyIPAdress
+        SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+    BastionHost:
+      Type: AWS::EC2::Instance
+      Properties:
+        IamInstanceProfile:
+          Fn::ImportValue:
+            !Sub "${EnvironmentName}-InstanceProfileID"
+        ImageId: !Ref AmazonAMI
+        InstanceType: t3.medium
+        KeyName: "that-one"
+        SecurityGroupIds:
+        - Ref: BastionHostSecGroup
+        SubnetId:
+          Fn::ImportValue:
+            !Sub "${EnvironmentName}-PUB1-SN"
+
+Outputs:
+    BastionHost:
+      Description: Bastion Host ID
+      Value: !Ref BastionHost
+      Export: 
+        Name: !Sub "${EnvironmentName}-BastionHostID"

@@ -1,0 +1,51 @@
+Description:
+    This template deploys aws iam role for EC2 to allow access to S3.
+
+Parameters:
+    EnvironmentName:
+        Description: An environment name that will be prefixed to resource names
+        Type: String
+
+Resources:
+    UdacityS3ReadOnlyEC2:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - ec2.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /
+        Policies:
+          - PolicyName: root
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action: 'S3:*'
+                  Resource: '*'
+
+    #instace profile contains the IAM Role name(s) that we want to associate to our auto scaling EC2 Servers
+    ProfileWithRolesForOurApp:
+      DependsOn: UdacityS3ReadOnlyEC2
+      Type: AWS::IAM::InstanceProfile
+      Properties: 
+        Roles:
+        - Ref: UdacityS3ReadOnlyEC2
+
+Outputs:
+    UdacityS3ReadOnlyEC2:
+      Description: A reference to the created EC2's role.
+      Value: !Ref UdacityS3ReadOnlyEC2
+      Export:
+        Name: !Sub ${EnvironmentName}-EC2RoleID
+
+    ProfileWithRolesForOurApp:
+      Description: A reference to the instance profile which is associated with UdacityS3ReadOnlyEC2 role.
+      Value: !Ref ProfileWithRolesForOurApp
+      Export:
+        Name: !Sub ${EnvironmentName}-InstanceProfileID
